@@ -34,8 +34,10 @@ public class Actor {
 //		List<Event> events = mapper.readValue(source, List.class);  
 
 		// List, Model type 을 지정함, Object 로 매핑된다
-		List<Event> events = mapper.readValue(source, 
-				mapper.getTypeFactory()
-				.constructCollectionType(List.class, Event.class)
-				);
+		// ObjectMapper.constructCollectionType()메소드를 사용 !
+		List<Event> events = mapper.readValue(
+																			source, 
+																			mapper.getTypeFactory()
+																							.constructCollectionType(List.class, Event.class)
+														);
 ```
