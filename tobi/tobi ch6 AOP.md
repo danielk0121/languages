@@ -235,11 +235,102 @@ static class MockUserDao implements UserDao {
 	- 어드바이스와 포인트컷은 모두 프록시에 DI로 주입돼서 사용된다.
 	- 두 가지 모두 여러 프록시에서 공유가 가능하도록 만들어지기 때문에 스프링의 싱글톤 빈으로 등록이 가능하다.
 	- 포인트컷은 Pointcut 인터페이스를 구현해서 만들면 된다.
+
+## 471p
+- 프록시로부터 어드바이스와 포인트컷을 독립시키고 DI를 사용하게 한 것은 전형적인 전략 패턴 구조다.
+- 어드바이스와 포인트컷을 묶은 오브젝트를 인터페이스 이름을 따서 어드바이저라고 부른다.
+
+```
+어드바이저 = 
+	포인트컷(메소드 선정 알고리즘)
+	+
+	어드바이스 (부가기능)
+```
+
+## 473p
+
+```
+// 트랜젝션 어드바이스
+//
+
+package springbook.user.service;
+
+public class TransactionAdvice implements MethodInterceptor {
+
+	@Setter
+	PlatformTransactionManager transactionManager;
 	
+	// 타깃을 호출하는 기능을 가진, 콜백 오브젝트를, 프록시로부터 받는다.
+	// 덕분에 어드바이스는, 특정 타깃에 의존하지 않고, 재사용 가능하다.
+	public Object invoke(MethodInvocation invocation) throws Trhowable {
+		
+		// 트랜젝션 시작
+		TranscationStatus status = transactionManager.getTranscation(
+				new DefaultTransactionDefinition());
+		
+		try {
+		
+			Object ret = invocation.proceed();  // 콜백으로 타깃의 메소드 실행
+			transactionManager.commit(status);  // 커밋
+			return ret;  // 콜백 리턴
+			
+		} catch (RuntimeException e) {
+			transactionManager.rollback(status);  // 롤백
+			throw e;
+		}
+	}
+}
 
+// xml 스프링 빈 설정
+//
 
+// 어드바이스
+<bean id="transactionAdvice" class="springbook.user.service.TransactionAdvice">
+	<property name="transactionManager" ref="transactionManager" />
+</bean>
 
+// 포인트컷
+<bean id="transcationPointcut" class="springbook.user.service.TranscationPointcut">
+	<property name="mappedName" value="upgrade*" />
+</bean>
 
+// 어드바이저
+<bean id="transcationAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+	<property name="advice" ref="transactionAdvice" />
+	<property name="pointcut" ref="transcationPointcut" />
+</bean>
+
+// 프록시 팩토리 빈 = userService
+<bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
+	<property name="target" ref="userServiceImpl" />
+	<property name="interceptorNames" >
+		<list>
+			<value>transcationAdvisor</value>
+		</list>
+	</property>
+</bean>
+
+// 테스트 코드
+//
+
+@Test
+@DirtiesContext // 컨텍스트 설정을 변경하기 때문에 여전히 필요하다
+public void upgradeAllOrNothing() {
+	
+	TestUserService testUserService = new TestUserService(users.get(3).getId());
+	testUserService.setUserDao(userDao);
+	testUserService.setMailSender(mailSender);
+	
+	ProxyFactoryBean txProxyFactoryBean = 
+		context.getBean("&userService", ProxyFactoryBean.class);  // &userService 이므로 FactoryBean 자체를 가져옴
+	txProxyFactoryBean.setTarget(testUserService);  // 컨텍스트 설정 변경
+	UserService txUserService = (UserService) txProxyFactoryBean.getObject();
+	
+	...
+}
+```
+
+## 
 
 
 
