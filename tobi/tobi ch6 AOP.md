@@ -344,7 +344,7 @@ public interface Pointcut {
 }
 ```
 
-## 428p
+## 482p
 
 ```
 @Test
@@ -407,9 +407,119 @@ private void checkAdviced(Object target, Pointcut pointcut, boolean adviced) {
 <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
 ```
 
-## 
+## 485p
+```
+// 클래스 필터가 포함된 포인트컷
+//
+package springbook.service;
 
+public class NameMatchClassMethodPointcut extends NameMatchMethodPointcut {
 
+	public void setMappedClassName(String mappedClassName) {
+		this.setClassFilter(new SimpleClassFilter(mappedClassName));
+	}
+	
+	static class SimpleClassFilter implements ClassFilter {
+	
+		String mappedName;
+		
+		private SimpleClassFilter(String mappedName) {
+			this.mappedName = mappedName;
+		}
+		
+		public boolean matchs(Class<?> clazz) {
+			// PatternMatchUtils: 스프링 유틸
+			return PatternMatchUtils.simpleMatch(mappedName, clazz.getSimpleName());
+		}
+	}
+}
+
+// 변경전, 포인트컷
+// 
+<bean id="transcationPointcut" class="springbook.user.service.TranscationPointcut">
+	<property name="mappedName" value="upgrade*" />
+</bean>
+
+// 변경후, 포인트컷
+<bean id="transcationPointcut" class="springbook.service.NameMatchClassMethodPointcut">
+	<property name="mappedClassName" value="*ServiceImpl" />
+	<property name="mappedName" value="upgrade*" />
+</bean>
+```
+
+## 487p
+```
+// 수정한 테스트용 UserService 구현 클래스
+// 트랜젝션 실패가 목적
+//
+static class TestUserServiceImpl extends UserServieImpl {
+	private String id = "madnite1";
+	
+	protected void upgradeLevel(User user) {
+		if(user.getId().equals(this.id) {
+			throw new TestUserServiceException();
+		}
+		super.upgradeLevel(user);
+	}
+}
+
+// 테스트용 UserService 등록
+// parent: 프로퍼티 정의를 포함해서 userService 빈의 설정을 상속받는다
+// testUserService 는 userService 빈의 설정을 상속받고, 클래스만 변경된다.
+// 따라서 userDao 나 mailSender 프로퍼티를 지정해줄 필요가 없다.
+//
+<bean id="testUserService"
+	class="springbook.user.service.UserServiceTest$TestUserServiceImpl"
+	parent="userService" />
+```
+
+## 490p
+```
+// DefaultAdvisorAutoProxyCreator에 의해 userService 빈이 프록시로 바꿔치기 됐다면
+// getBean("userService")로 가져온 오브젝트는 TestUserService 타입이 안디라 JDK의 Proxy 타입일 것이다.
+// 모든 JDK 다이내믹 프록시 방식으로 만들어지는 프록시는 Proxy 클래스의 서버클래스이기 때문이다
+//
+@Test
+public void advisorAutoProxyCreator() {
+	assertThat(testUserService, is(java.lang.reflet.Proxy.class));
+}
+```
+
+## 491p - 495p
+- 포인트컷 표현식
+- 포인트컷 표현식을 지원하는 포인트컷을 적용하려면 AspectJExpressionPointcut 클래스를 사용하면 된다.
+
+```
+// 포인트컷 테스트용 클래스들
+// 
+
+public interface TargetInterface {
+	public void hell() ;
+	public void hello(String a) ;
+	public int minus(int a, int b) throws RuntimeException ;
+	public void int plus(int a, intb) ;
+}
+
+public class Target implements TargetInterface {
+	public void hell() {}
+	public void hello(String a) {}
+	public int minus(int a, int b) throws RuntimeException { return 0; }
+	public void int plus(int a, intb) { return 0; }
+	public void method() {}  // new
+}
+
+public class Bean {
+	public void method() throws RuntimeException { }
+}
+
+// 메소드 시그니처를 이용한 포인트컷 표현식 테스트
+//
+@Test
+public void methodSignaturePointcut throws SecurityException, NoSuchMethodException {
+
+	// TODO 작성 해야됨...
+}
+```
 
 
 
