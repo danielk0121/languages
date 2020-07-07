@@ -517,19 +517,101 @@ public class Bean {
 @Test
 public void methodSignaturePointcut throws SecurityException, NoSuchMethodException {
 
-	// TODO 작성 해야됨...
+	// Target 클래스, minus() 메소드 시그니처
+	AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
+	pointcut.setExpression("execution("
+		+ "public int "
+		+ "springbook.spring.pointcut.Target."
+		+ "minus(int, int) "
+		+ "throws java.lang.RuntimeException"
+		+ ")"
+		);
+		
+	// Target.minus()
+	// 클래스 필터와 메소드 매처를 가져와 각각 비교한다
+	assertThat(
+				pointcut.getClassFilter()
+					.matches(Target.class)
+				&&
+				pointcut.getMethodMatcher()
+					.matches(Target.class.getMethod("minus", int.class, int.class), null)
+			, is(true)
+			);
+	
+	// Target.plus()
+	// 메소드 매처에서 실패
+	assertThat(
+		pointcut.getClassFilter().matches(Target.class)
+		&&
+		pointcut.getMethodMatcher().matches(
+			Target.class.getMethod(
+				"plus", int.class, int.class)
+			, null)
+		), is(false)
+		);
+	
+	// Bean.method()
+	// 클래스 필터에서 실패
+	assertThat(
+		pointcut.getClassFilter().matches(Bean.class)
+		&&
+		pointcut.getMethodMatcher().matches(
+			Target.class.getMethod("method"), null)
+		, is(false)
+		);
 }
 ```
 
+## 500p
+- AspectJ 포인트컷 표현식은 메소드를 선정하는 데 편리하게 쓸 수 있는 강력한 표현식 언어다.
+- ``` bean(*Service) ``` : 아이디가 Service로 끝나는 모든 빈
+- ``` @annotation(org.springframework.transcation.annotation.Transcational) ``` : @Transcational 적용된 모든 메소드를 선정하는 포인트컷
 
+## 501p
+```
+// 변경전
+//
+<bean id="transcationPointcut" class="springbook.service.NameMatchClassMethodPointcut">
+	<property name="mappedClassName" value="*ServiceImpl" />
+	<property name="mappedName" value="upgrade*" />
+</bean>
 
+// 변경후
+//
+<bean id="transcationPointcut"
+	class="org.springframework.aop.aspectj.AspectJExpressionPointcut">
+	<property name="expression"
+		value="execution(* *..*ServiceImpl.upgrade*(..))" 
+		/>
+</bean>
+```
 
+## 503p
+- UserSerivce에 트랜잭션을 적용해온 과정 정리
+	- 트랜잭션 서비스 추상화
+	- 프록시, 데코레이터 패턴
+	- 다이나믹 프록시, 프록시 팩토리 빈
+	- 자동 프록시 생성 방법, 포인트컷
+		- 스프링 컨테이너의 빈 생성 후처리 기법
+			- DefaultAdvisorAutoProxyCreator
 
-
-
-
-
-
+## 506p
+- aspect 애스팩트
+	- 그 자체로 어플리케이션의 핵심기능을 담지는 않지만
+	- 핵심기능에 부가되어 의미를 갖는 특별한 모듈
+	- 애스펙트 = 어드바이스(부가기능 정의) + 포인트컷(적용 조건)
+		- 어드바이저는 아주 단순한 형태의 애스팩트
+- AOP: Aspect Oriented Programming
+	- 어플리케이션이 핵심적인 기능에서
+	- 부가적인 기능을 분리해서
+	- 애스팩트라는 독특한 모듈로 만들어서
+	- 설계하고 개발하는 방법론
+	- 어플리케이션을 다양한 관점에서 바라보며 개발할 수 있게 도와준다
+		- 어플리케이션을 사용자 관리라는 핵심 로직이 아니라
+		- 대신 트랜잭션 경계설정이라는 관점에서 바라보고
+			- 그 부분에 집중해서 설계하고 개발할 수 있게 된다
+		- 트랜잭션 기술의 적용에만 주목하고 싶다면
+			- TransactionAdvice 에만 집중하면 된다
 
 
 
