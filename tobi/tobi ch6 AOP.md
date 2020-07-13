@@ -619,13 +619,127 @@ public void methodSignaturePointcut throws SecurityException, NoSuchMethodExcept
 		- 트랜잭션 기술의 적용에만 주목하고 싶다면
 			- TransactionAdvice 에만 집중하면 된다
 
+## 513p
+- aop 네임스페이스 선언
+```
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+	"
+...
+</beans>
+```
 
+- aop 네임스페이스를 적용한 AOP 설정 빈
+```
+// AOP 설정을 담는 부모 태그다.
+// 필요에 따라 AspectJAdvisorAutoProxyCreator 를 빈으로 등록해준다
+<aop:config>
 
+	// expression 표현식을 프로퍼티로 가진 AspectJExpressionPointcut 을 빈으로 등록해준다
+	<aop:pointcut 
+		id="transactionPointcut" 
+		expression="execution(* *..*ServiceImpl.upgrade*(..))"
+		/>
 
+	// advice 와 pointcut 의 ref 를 프로퍼티로 갖는 DefaultBeanFactoryPointcutAdvisor 를 등록해준다
+	<aop:advisor 
+		advice-ref="transactionAdvice"
+		pointcut-ref="transactionPointcut"
+		/>
+</aop:config>
+```
 
+## 515p
+- 트랜젝션 정의
+	- DefaultTransactionDefinition
+	- 1. 트랜젝션 전파
+		- PROPAGATION_REQUIRED
+		- PROPAGATION_REQUIRES_NEW
+		- PROPAGATION_NOT_SUPPORTED
+	- 2. 격리수준
+		- isolation level
+			- DB 설정
+			- JDBC 드라이버 설정
+			- DataSource 등에서 재설정
+			- 트랜잭션 단위 설정
+	- 3. timeout
+	- 4. read-only
 
+## 521p
+- 트랜잭션 속성 정의 예
+```
+<bean id="transcationAdvice"
+	class="org.springframework.transcation.interceptor.TranscationInterceptor"
+	<property name="transactionManager" ref="transactionManager" />
+	<property name="transactionAttributes">
+		<props>
+			<prop key="get*">PROPAGATION_REQUIRED, readOnly, timeout_30</prop>
+			<prop key="upgrade*">PROPAGATION_REQUIRES_NEW, ISOLATION_SERIALIZABLE</prop>
+			<prop key="*">PROPAGATION_REQUIRED</prop>
+		</props>
+	</property>
+```
 
+## 522P
+- TranscationInterceptor 타입의 어드바이스 빈과
+	- TransactionAttribute 타입의 속성 정보도
+	- tx 스키마의 전용 태그를 이용해 정의할 수 있다.
 
+```
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"  // tx 네임스페이스 선언
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	">
+	
+<tx:advice
+	id="transactionAdvice"
+	transaction-manager="transactionManager"
+	>
+	<tx:attributes>
+		<tx:method name="get*"
+			propagation="REQUIRED"
+			read-only="true"
+			timeout="30"
+			/>
+		<tx:method name="upgrade*"
+			propagation="REQUIRES_NEW"
+			isolation="SERIALIZABLE"
+			/>
+		<tx name="*"
+			propagation="REQUIRED"
+			/>
+	</tx:attributes>
+</tx:advice>
+```
+
+## 530p
+```
+// 아이디가 Service 로 끝나는 모든 bean 에 
+// transactionAdvice 빈의 부가기능이 적용된다
+<aop:config>
+	<aop:advisor
+		advice-ref="transactionAdvice"
+		pointcut="bean(*Service)"
+		/>
+</aop:config>
+```
+
+## 535부터 계속...
 
 
 
