@@ -330,7 +330,7 @@ sqlProvider.loadSql();
 	- 빈 객체를 생성하고, DI 작업을 수행해서, 프로퍼티를 모두 주입 한 후에
 	- 미리 지정한 초기화 메소드를 호출 하도록 한다
 ```
-// context xml 파일에 추가
+// @PostConstruct 사용을 위해서, context xml 파일에 추가
 <context:annotation-config />
 
 // JDK6 포함, java.lang.annotation 패키지
@@ -348,9 +348,12 @@ public void loadSql() {
 		- 두번째, 읽오온 SQL 정보를 보관해두고 있다가 필요할 때 제공하는 것
 ```
 // SqlService 서비스 객체의 구조
-DAO -> SqlService 
-					-> 읽기 요청      -> SqlReader    ---> Sql 리소스
-          -> Sql 등록,조회  -> SqlRegistry  <--- SqlUpdater
+DAO
+  -> SqlService 
+				-> 읽기 요청
+						-> SqlReader    ---> Sql 리소스
+				-> Sql 등록,조회
+						-> SqlRegistry  <--- SqlUpdater
 ```
 
 ## 584 페이지부터...
