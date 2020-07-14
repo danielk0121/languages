@@ -711,12 +711,14 @@ public void methodSignaturePointcut throws SecurityException, NoSuchMethodExcept
 	transaction-manager="transactionManager"
 	>
 	<tx:attributes>
-		<tx:method name="get*"
+		<tx:method 
+			name="get*"
 			propagation="REQUIRED"
 			read-only="true"
 			timeout="30"
 			/>
-		<tx:method name="upgrade*"
+		<tx:method 
+			name="upgrade*"
 			propagation="REQUIRES_NEW"
 			isolation="SERIALIZABLE"
 			/>
@@ -739,7 +741,94 @@ public void methodSignaturePointcut throws SecurityException, NoSuchMethodExcept
 </aop:config>
 ```
 
-## 538부터 계속...
+## 553p
+```
+// 트랜잭션 메니저 빈 선언
+<bean id="transactionManager"
+	class="org.springframework.jdbc.datasource.DataSourceTransactionManager" >
+
+// 테스트 코드에서 @Autowired 로 주입 받아서 사용
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/test-applicationContext.xml")
+public class UserServiceTest {
+
+	@Autowired PlatformTransactionManager transactionManager;
+	...
+}
+
+// 명시적으로 테스트 코드에서 트랜젝션을 시작하게 만들어서 테스트
+@Test
+public void transactionSync() {
+
+	// 트랜젝션으로 명시적으로 시작함
+	DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+	txDefinition.setReadOnly(true);
+	TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
+	
+	// userService 에서 사용되는 트랜젝션들은 REQUIRED 이므로
+	// 앞서 시작한 트랜젝션에 전파되어서
+	// 하위 코드들은 모두 같은 트랜젝션 1개에서 실행된다
+	
+//	userService.deleteAll();  // readOnly 속성때문에 실패한다
+	
+	userService.add(users.get(0));
+	userService.add(users.get(1));
+	
+	// 앞에서 시작한 트랜잭션을 커밋한다
+	transactionManager.commit(txStatus);
+}
+
+// finally 롤백으로 테스트 결과를 DB에 반영 안할 수 있다
+@Test
+public void transactionSync() {
+
+	// 테스트 메소드 안의 작업을 하나의 트랜젝션으로 통합한다.
+	DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+	TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
+	
+	try {
+		
+		userService.deleteAll();
+		userService.add(users.get(0));
+		userService.add(users.get(1));
+	} finally {
+	
+		// 테스트 결과가 어떻든 상관없이 테스트가 끝나면 무조건 롤백한다
+		// 테스트 중 발생한 결과가 DB에 반영되지 않는다
+		transactionManager.rollback(txStatus);
+	}
+}
+
+// transactionManager.getTransaction() 을 하지 않고
+// @Transactional 을 사용해서 트랜젝션을 구성한다
+@Test
+@Transactional  // 테스트에서 사용되면 기본적으로 롤백됨
+@Rollback(false)  // 롤백을 하지 않고, 커밋되도록 함
+public void transactionSync() {
+	...
+}
+
+// @Rollback 은 메소드 레벨에만 적용 가능함
+// @TransactionConfiguration 을 클래스 레벨에 적용해서
+// 테스트 클래스의 메소드 작업이 롤백되지 않고 커밋되도록 할 수 있음
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/test-applicationContext.xml")
+@Transactional
+@TransactionConfiguration(defaultRollback=false)  // 커밋을 명시
+public class UserServiceTest {
+
+	@Test
+	@Rollback  // 메소드에서 롤백을 지정한다
+	public void add() throws SQLException {
+		...
+	}
+}
+
+// 메소드 레벨, 트렌젝션 적용 무시 하는 방법
+// @NotTransactional  // 스프링 3.0 에서 제거 대상이 됨
+// 트랜젝션 전파를 무시하도록 설정하면, 트랜젝션이 없는 메소드로 작동함
+@Transactional(propagation = Propagation.NEVER)
+```
 
 
 
