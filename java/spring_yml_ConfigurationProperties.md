@@ -1,19 +1,16 @@
 ## yaml 파일
 ```
 tcp:
-  dummy: 10
   server:
     host: localhost
     port: 10200
     charset: UTF-8
   client:
-    # 주문확정/결제확정
     confirm:
       host: localhost
       portOdd: 4517
       portEven: 14517
       charset: UTF-8
-    # 재고조회/주문정보
     other:
       host: localhost
       portOdd: 4518
