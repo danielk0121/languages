@@ -1,6 +1,6 @@
-스프링 부트에서 어플리케이션을 강제 종료 하고 싶은 경우
-System.exit() 를 사용하면 무시가 된다
-스프링에서 exit 시 처리하는 빈이 없어서 무시되는거 같음
+- 스프링 부트에서 어플리케이션을 강제 종료 하고 싶은 경우 
+- System.exit() 를 사용하면 무시가 된다
+- 스프링에서 exit 시 처리하는 빈이 없어서 무시되는거 같음
 
 ```
 import lombok.RequiredArgsConstructor;
