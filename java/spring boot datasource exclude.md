@@ -1,5 +1,5 @@
 # spring boot 기본 데이터 소스 로딩하는 것 방지
-```
+```java
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
