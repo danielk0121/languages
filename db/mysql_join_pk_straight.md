@@ -1,3 +1,4 @@
+```sql
 select pp.id, pp.name, b.name as brand_name
 from product pp USE INDEX (`PRIMARY`)
 join brand b USE INDEX (`PRIMARY`) on b.id = pp.brand_id
@@ -42,3 +43,4 @@ from product p
 order by p.id desc
 limit 30
 ;
+```
