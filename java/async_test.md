@@ -1,4 +1,5 @@
 ```java
+
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -23,6 +24,11 @@ public class AsyncStudyTest {
     @SneakyThrows
     @Test
     public void test01() {
+        // 테스트 시나리오
+        // api call 이후 최대 A 시간 동안 응답을 기다리는데, 
+        // A 시간이 초과하면 에러 리턴, 하지만 api 가 응답이 끝나면 따로 기록
+        // A 시간 이내에 응답이 오면 응답을 사용
+        //
 
         long st = System.currentTimeMillis();
 //        ExecutorService worker = Executors.newSingleThreadExecutor();
