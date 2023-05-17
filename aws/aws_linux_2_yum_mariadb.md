@@ -31,5 +31,18 @@ sudo yum install MariaDB-server MariaDB-client
 
 # rds 접속
 mysql --host=testdb.xxxxxxx.ap-northeast-2.rds.amazonaws.com --port=3306 --user='test' --password='test'
+```
 
+```text
+# 출처 : https://stackoverflow.com/questions/75452027/can-not-install-mariadb-on-amazon-linux-arm-packages-not-found
+
+비 x86_64 플랫폼용 Centos7은 더 이상 사용되지 않습니다. 
+참조: https://mariadb.com/kb/en/deprecation-policy/
+Centos 7을 제공하는 RHEL7은 비 86_64 플랫폼에 대한 지원이 종료되었습니다. 
+Centos7은 여전히 aarch64에 대해 지원된다고 주장 하지만 
+버그 수정 (RHEL에보고 된 MariaDB 개발에 영향을 미치고 RHEL8에서만 수정 된 버그 포함)을 
+얻지 못하므로 모든 집중적 인 목적을 위해 유지 관리되지 않습니다.
+
+따라서 MariaDB는 더 이상 비 x86_64 플랫폼에서 Centos/RHEL 7 릴리스를 수행하지 않습니다.
+참조: MDEV-30636 : https://jira.mariadb.org/browse/MDEV-30636
 ```
