@@ -89,8 +89,26 @@ sudo rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
 sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 
 # 젠킨스 설치확인, 실행
-yum list installed
+yum list installed *jenkins*
 sudo yum install jenkins
+sudo systemctl start jenkins
+
+
+#########################################
+
+## 젠킨스 원하는 버전 설치
+
+# java 설치
+sudo yum list java*jdk-devel
+sudo yum install java-1.8.0-openjdk-devel
+sudo yum -y install java-11-openjdk-devel.x86_64
+sudo alternatives --config java
+
+# jenkins 는 rpm 으로 설치
+https://get.jenkins.io/redhat-stable/
+젠킨스 다운로드 홈페이지에 들어가서 찾는 버전에 맞는 rpm 파일 다운로드 주소를 복사함
+sudo yum install https://get.jenkins.io/redhat-stable/jenkins-2.289.3-1.1.noarch.rpm
+sudo yum list *jenkins*
 sudo systemctl start jenkins
 
 
