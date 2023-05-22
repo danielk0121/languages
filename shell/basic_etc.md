@@ -12,11 +12,4 @@ scp -r testgogo root@192.168.159.129:/tmp/testclient
 # scp 원격 2 로컬
 scp root@192.168.159.129:/tmp/testclient/testfile2 /tmp
 
-
-
-
-
-
-
-
 ```

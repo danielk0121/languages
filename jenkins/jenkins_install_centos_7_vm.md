@@ -111,5 +111,48 @@ sudo yum install https://get.jenkins.io/redhat-stable/jenkins-2.289.3-1.1.noarch
 sudo yum list *jenkins*
 sudo systemctl start jenkins
 
+# centos 7 git 최신버전 설치
+# centos 7 저장소에는 git 1.8 까지밖에 없다
+yum install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-1.noarch.rpm
+yum remove git
+yum install git
+git --version
+
+# jenkins 유저로 로그인
+# 안될경우 sudo 명령어로 로그인
+# passwd 파일보고 사용자의 홈 경로, 기본 사용 쉘 확인
+# 
+# jenkins:x:998:996:Jenkins Automation Server:/var/lib/jenkins:/bin/bash
+# jenkins : user id
+# /var/lib/jenkins : home
+# /bin/bash : 기본 사용 쉘, /bin/false 인 경우 /bin/sh 나 /bin/bash 로 변경
+# 
+su - jenkins
+sudo -u jenkins -s
+whoami
+pwd
+cat /etc/passwd
+
+# yum 패키지 매니저는 htop 이 기본으로 포함되어있지 않기 때문에
+# EPEL repository 를 추가한다.
+# htop 설치
+$ sudo yum -y install epel-release
+$ sudo yum -y install htop
+
+# aws command not found 에러 !
+# 
+# 젠킨스 ui > /configure > Global Properties
+# > Environment variables > 키-값 목록
+# 키 : PATH+usr-local
+# 값 : /usr/local/bin
+
+# aws cli 1.18.147 설치
+# aws profile 설정 (default, dcode-develop-jenkins 2개 프로파일 필수)
+# default = 9계정 production
+# dcode-develop-jenkins = 6계정 development
+
+# docker 설치
+
+# jq 설치
 
 ```
