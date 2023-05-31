@@ -143,3 +143,26 @@ internal class SearchPropertiesTest @Autowired constructor (
     }
 }
 ```
+
+build.gradle.kts
+```text
+plugins {
+    kotlin("jvm") version "1.4.32"
+    kotlin("plugin.spring") version "1.4.32"
+    id("org.springframework.boot") version "2.4.5"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+}
+
+// ...중략...
+
+dependencies {
+    // ...중략...
+    
+    // test
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    
+    // configuration processor
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+}
+```
